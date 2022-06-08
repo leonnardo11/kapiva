@@ -6,24 +6,71 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Cart;
 use App\Models\Order;
+use App\Models\Category;
 use Session;
 use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
-    function index(){
-        $data = Product::all();
-        return view('product', ['products'=>$data]);
+
+    public function index (Product $product){
+        return view('product')->with(['product.index' => Product::all(), 'categories' => Category::all()]);
     }
 
-    function detail($id){
-        $data =  Product::find($id);
-        return view('detail', ['product'=>$data]);
+    public function create(){
+        return view('/product/create')->with(['categories' => Category::all()]);
     }
-    function search(Request $req){
-        $data= Product::where('name', 'like', '%'.$req->input('query').'%')->get();
-        return view('search', ['products'=>$data]);
+
+    public function store(Request $request){
+        $image = "/storage/".$request->file('image')->store('itens'); //salva a imagem no storage e retorna o caminho
+        $product = Product::create([ //cria um novo produto no banco de dados com os dados do formulário e o caminho da imagem salva no storage no banco de dados
+            'name' => $request->name,
+            'description' => $request->description,
+            'price' => $request->price,
+            'stock' => $request->stock,
+            'category_id' => $request->category_id,
+            'image' => $image,
+        ]);
+        session()->flash('success','Produto Criado com Sucesso!');
+        return redirect(route('product.index'));
     }
+
+    public function destroy(Product $product){
+        $product->delete();
+        session()->flash('sucess', 'Produto removido com sucesso');
+        return redirect(route('product.index'));
+    }
+
+    public function edit(Product $product, Category $categories){
+
+        return view('product.edit')->with(['products'=> $product,
+                                            'categories'=> Category::all()]);
+    }
+
+    public function update(Product $product, Request $request){
+        if($request->image){
+            $image = "/storage/".$request->file('image')->store('itens');
+            $product->update([
+                'name' => $request->name,
+                'description' => $request->description,
+                'price' => $request->price,
+                'stock' => $request->stock,
+                'category_id' => $request->category_id,
+                'image' => $image
+            ]);
+        }
+        else
+            $product->update([
+                'name' => $request->name,
+                'description' => $request->description,
+                'price' => $request->price,
+                'stock' => $request->stock,
+                'category_id' => $request->category_id,
+            ]);
+        session()->flash('success','Produto Editado com Sucesso!');
+        return redirect(route('product.index'));
+    }
+
     function addToCart(Request $req){
         if($req->session()->has('user')){
             $cart =  new Cart;
@@ -33,7 +80,7 @@ class ProductController extends Controller
             return redirect('/login');
         }else{
             return redirect('/login');
-        }  
+        }
     }
     static function cartItem(){
         $userId= Session::get('user')['id'];
@@ -46,7 +93,7 @@ class ProductController extends Controller
          ->where('cart.user_id',$userId)
          ->select('products.*','cart.id as cart_id')
          ->get();
- 
+
          return view('cartlist',['products'=>$products]);
     }
     function removeCart($id){
@@ -60,7 +107,7 @@ class ProductController extends Controller
          ->where('cart.user_id',$userId)
          ->select('products.*','cart.id as cart_id')
          ->sum('products.price');
- 
+
          return view('ordernow',['total'=>$total]);
     }
 
@@ -87,7 +134,7 @@ class ProductController extends Controller
          ->join('products','orders.product_id','=','products.id')
          ->where('orders.user_id',$userId)
          ->get();
- 
+
          return view('myorders',['orders'=>$orders]);
     }
 }

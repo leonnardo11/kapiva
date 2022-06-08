@@ -1,25 +1,41 @@
-@extends('master')
-@section("content")
-<div class="container" >
-  <div class="row">
-    <div class="col-sm-6">
-    <img class="detail-img" src="{{$product['gallery']}}" alt="">
-    </div>
-    <div class="col-sm-6">
-        <a href="/">Voltar</a>
-        <h2>{{$product['name']}}</h2>
-        <span>Preço: {{$product['price']}}</span>
-        <p>Descriçaõ: {{$product['description']}}:</p>
-        <span>Categotria: {{$product['category']}}</span>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ $products['name'] }} - ECOIN</title>
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+</head>
 
-        <form action="/add_to_cart" method="post" class="mt-5">
-            @csrf
-            <input type="hidden" name="product_id" value={{$product['id']}}>
-            <button class="btn btn-primary mb-3 " >Adicionar ao carrinho</button>
-        </form>
-    
-        <button class="btn btn-success" style="display:block;">Comprar agora</button>
-    </div>
-  </div>
-</div>
-@endsection
+<body>
+    <header>
+
+    </header>
+    <main>
+        <div class="container-product">
+
+            <div class="product-image">
+                @if($products->image)
+                <img src="{{ asset($products->image) }}" alt="{{$products->name}}" class="product">
+                @else
+                <img src="{{ asset('images/404.png') }}" alt="Imagem não encontrada" class="product" title="Imagem não encontrada">
+                @endif
+            </div>
+            <div class="product-text">
+                <h1>{{ $products['name'] }}</h1>
+                <p>{{ $products['description'] }}</p>
+                <p>R$ <span>{{ $products['price'] }}</span></p>
+                <div class="buttons-product">
+                    <form method="POST" action="{{route('cartlist', $products)}}">
+                        @csrf
+                        <p color="style:green;"> {{session()->get('sucess')}} </p>
+                        <button type="submit">Adicionar ao carrinho</button>
+                        <button type="submit">Comprar agora</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+        </body>
+
+</html>
