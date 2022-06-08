@@ -22,6 +22,7 @@ return new class extends Migration
             $table->integer('category_id');
             $table->string('image')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
     /**
