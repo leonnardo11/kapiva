@@ -1,6 +1,9 @@
 <div style="clear:both" class="panel panel-default">
     <div class="panel-body">
-      Panel content
+
     </div>
-    <div class="panel-footer">Panel footer</div>
+    <div class="panel-footer">
+        <img src="/imgs/logo-footer.svg" style="height: 100px;width: 200px">
+
+    </div>
 </div>
